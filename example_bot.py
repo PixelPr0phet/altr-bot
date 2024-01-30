@@ -3,32 +3,36 @@ import config
 import logging
 import requests
 import json
+from discord.ext import commands
+import random
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = discord.Client(intents=intents)
+# client = discord.Client(intents=intents, command_prefix='$')
+bot = commands.Bot(command_prefix='$', intents=intents)
 
-def get_quote():
-    response = requests.get
-    ("https://zenquotes.io/api/random")
-    json_data = json.loads(response.text)
-    quote = f"{json_data[0]['q']} - {json_data[0]['a']}"
-    return(quote)
 
-@client.event
+
+@bot.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    await bot.load_extension('inspire')
+    print(f'We have logged in as {bot.user}')
 
-@client.event
+@bot.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == bot.user:
         return
-    
-    if message.content.startswith('$inspire'):
-        quote = get_quote()
-        await message.channel.send(quote)
+    if random.randint(1,10) == 5:
+        await message.channel.send(f"{message.author} got that dawg in me")
+    await bot.process_commands(message)    
 
-client.run(config.altr_token, log_handler=handler, log_level=logging.DEBUG)
+
+@bot.command()
+async def reload(ctx):
+    await bot.reload_extension('inspire')
+
+bot.run(config.altr_token, log_handler=handler, log_level=logging.DEBUG)
+
